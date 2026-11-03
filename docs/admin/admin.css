@@ -86,6 +86,13 @@ tbody tr.click { cursor: pointer; transition: background 0.1s; }
 tbody tr.click:hover, tbody tr.click:focus-visible { background: var(--warn-bg); }
 .scroll { overflow-x: auto; }
 .q-body { max-width: 440px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+th.act, td.act { width: 1%; white-space: nowrap; text-align: right; position: sticky; right: 0; background: var(--card); }
+tbody tr.click:hover td.act, tbody tr.click:focus-visible td.act { background: var(--warn-bg); }
+td.act { vertical-align: middle; }
+.btn-icon { min-height: 36px; width: 38px; padding: 0; box-shadow: 2px 2px 0 var(--bad); }
+.btn-icon svg { display: block; }
+.btn-icon:hover:not(:disabled) { background: var(--bad); color: #ffffff; filter: none; }
 
 .badge { display: inline-block; padding: 3px 9px 1px; border: 2px solid currentColor; border-radius: 3px; font: 800 14px/1.1 var(--disp); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
 .b-draft { color: var(--ink-2); }

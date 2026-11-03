@@ -184,7 +184,7 @@
     const sel = (value, options, onchange) => h('select', { onchange: (e) => onchange(e.target.value) },
       options.map(([v, label]) => h('option', { value: v, selected: String(v) === String(value) }, label)));
     let timer = null;
-    L.tableBox = h('div', { class: 'card scroll' });
+    L.tableBox = h('div', { class: 'card' });
     return h('div', { class: 'stack' },
       h('div', { class: 'title-row' }, h('h2', {}, 'Suallar'), h('button', { class: 'btn btn-primary', type: 'button', onclick: () => go('new') }, '+ Yeni sual')),
       h('div', { class: 'card row' },
@@ -198,12 +198,45 @@
       L.tableBox);
   }
 
+  function trashIcon() {
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', width: '18', height: '18', fill: 'none', stroke: 'currentColor',
+      'stroke-width': '2.4', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' })) svg.setAttribute(k, v);
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6');
+    svg.append(path);
+    return svg;
+  }
+
+  async function deleteFromList(r) {
+    if (S.busy) return;
+    const short = r.body.length > 90 ? `${r.body.slice(0, 90)}…` : r.body;
+    const warn = r.status === 'draft'
+      ? 'Bu qaralama həmişəlik silinəcək.'
+      : 'Bu sual silinəcək. Əgər oyunlarda istifadə olunubsa, silinmir, arxivə göndərilir.';
+    if (!window.confirm(`${warn}\n\n“${short}”\n\nDavam edək?`)) return;
+    S.busy = true;
+    try {
+      const res = await rpc('delete_question', { p_id: r.id });
+      if (res === 'archived') toast('Sual oyunlarda istifadə olunub, ona görə silinmədi — arxivə göndərildi.', 5200);
+      else if (res === 'in_use') toast('Sual oyunlarda istifadə olunub və artıq arxivdədir, bazadan silinə bilməz.', 5200);
+      else {
+        toast('Silindi.');
+        if (r.media_path) sb.storage.from(BUCKET).remove([r.media_path]).catch(() => {});
+        if (S.list.rows.length === 1 && S.list.page > 0) S.list.page -= 1;
+      }
+    } catch (e) { toast(errText(e)); }
+    S.busy = false;
+    await loadList();
+  }
+
   async function loadList() {
     const L = S.list;
     L.loading = true;
     renderTable();
     let q = sb.from('questions')
-      .select('id,level,body,status,legal_ref,media_type,category_id,updated_at,categories(title_az)', { count: 'exact' });
+      .select('id,level,body,status,legal_ref,media_type,media_path,category_id,updated_at,categories(title_az)', { count: 'exact' });
     if (L.status) q = q.eq('status', L.status);
     if (L.cat) q = q.eq('category_id', Number(L.cat));
     if (L.level) q = q.eq('level', Number(L.level));
@@ -236,12 +269,18 @@
         h('td', {}, r.media_type ? mediaLabel[r.media_type] : ''), h('td', {}, badge(r.status)),
         h('td', {}, r.legal_ref ? 'var' : h('span', { class: 'muted' }, 'yoxdur')),
         h('td', {}, st ? `${st.answered} · ${Math.round(Number(st.correct_rate) * 100)}%` : '—'),
-        h('td', {}, fmtDate(r.updated_at)));
+        h('td', {}, fmtDate(r.updated_at)),
+        h('td', { class: 'act' }, h('button', {
+          class: 'btn btn-danger btn-icon', type: 'button', title: 'Sil', 'aria-label': 'Sualı sil',
+          onclick: (e) => { e.stopPropagation(); deleteFromList(r); },
+          onkeydown: (e) => e.stopPropagation(),
+        }, trashIcon())));
     });
     L.tableBox.replaceChildren(
-      h('table', {},
-        h('thead', {}, h('tr', {}, ['Çətinlik', 'Kateqoriya', 'Sual', 'Media', 'Status', 'İstinad', 'Cavab · düzgün', 'Yenilənib'].map((t) => h('th', {}, t)))),
-        h('tbody', {}, rows)),
+      h('div', { class: 'scroll' }, h('table', {},
+        h('thead', {}, h('tr', {}, [...['Çətinlik', 'Kateqoriya', 'Sual', 'Media', 'Status', 'İstinad', 'Cavab · düzgün', 'Yenilənib'].map((t) => h('th', {}, t)),
+          h('th', { class: 'act' }, h('span', { class: 'sr' }, 'Sil'))])),
+        h('tbody', {}, rows))),
       h('div', { class: 'row', style: 'margin-top:12px;justify-content:space-between;align-items:center' },
         h('span', { class: 'muted small' }, `${from}–${to} / ${L.total}`),
         h('div', { class: 'actions' },
