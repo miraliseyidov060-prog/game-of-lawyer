@@ -218,7 +218,7 @@
     if (!window.confirm(`${warn}\n\n“${short}”\n\nDavam edək?`)) return;
     S.busy = true;
     try {
-      const res = await rpc('delete_question', { p_id: r.id });
+      const res = await rpc('remove_question', { p_id: r.id });
       if (res === 'archived') toast('Sual oyunlarda istifadə olunub, ona görə silinmədi — arxivə göndərildi.', 5200);
       else if (res === 'in_use') toast('Sual oyunlarda istifadə olunub və artıq arxivdədir, bazadan silinə bilməz.', 5200);
       else {
@@ -437,9 +437,11 @@
     const E = S.edit;
     if (!window.confirm('Bu qaralama həmişəlik silinəcək. Davam edək?')) return;
     try {
-      await rpc('delete_question', { p_id: E.id });
-      if (E.form.media_path) sb.storage.from(BUCKET).remove([E.form.media_path]).catch(() => {});
-      toast('Silindi.');
+      const res = await rpc('remove_question', { p_id: E.id });
+      if (res === 'deleted') {
+        if (E.form.media_path) sb.storage.from(BUCKET).remove([E.form.media_path]).catch(() => {});
+        toast('Silindi.');
+      } else toast('Sual oyunlarda istifadə olunub, ona görə silinmədi — arxivə göndərildi.', 5200);
       go('list');
     } catch (e) { toast(errText(e)); }
   }

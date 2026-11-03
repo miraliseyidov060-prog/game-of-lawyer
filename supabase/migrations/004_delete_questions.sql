@@ -1,12 +1,10 @@
 -- Siyahıdan istənilən sualı silmək üçün.
--- Əvvəl yalnız qaralama silinirdi. İndi: heç bir oyunda istifadə olunmayıbsa status fərq etmədən silinir;
--- oyunlarda artıq iştirak edibsə (run_questions) bazadan çıxarmaq mümkün deyil, sual arxivə göndərilir
--- (oyundan çıxır, keçmiş nəticələr pozulmur).
+-- Köhnə delete_question(uuid) yalnız qaralamanı silirdi. Yeni remove_question(uuid):
+-- oyunlarda istifadə olunmayıbsa status fərq etmədən silir; oyunlarda artıq iştirak edibsə
+-- (run_questions) bazadan çıxarmaq mümkün deyil, sual arxivə göndərilir (keçmiş nəticələr pozulmur).
 -- Qaytarır: 'deleted' | 'archived' | 'in_use' (artıq arxivdədir və tarixçəsi var).
 
-drop function if exists public.delete_question(uuid);
-
-create function public.delete_question(p_id uuid) returns text
+create or replace function public.remove_question(p_id uuid) returns text
 language plpgsql security definer set search_path = public as $$
 declare
   v_status public.question_status;
@@ -28,5 +26,5 @@ begin
   end;
 end $$;
 
-revoke execute on function public.delete_question(uuid) from public, anon;
-grant execute on function public.delete_question(uuid) to authenticated;
+revoke execute on function public.remove_question(uuid) from public, anon;
+grant execute on function public.remove_question(uuid) to authenticated;
