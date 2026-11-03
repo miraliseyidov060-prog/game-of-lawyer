@@ -30,8 +30,7 @@
     author_cannot_review: 'Müəllif öz sualını dərc edə bilməz. Başqa redaktor yoxlamalıdır.',
     legal_ref_required: 'Dərc üçün qanun istinadı yazın.',
     bad_transition: 'Bu status dəyişikliyi mümkün deyil.',
-    only_drafts_can_be_deleted: 'Yalnız qaralama silinə bilər. Digərlərini arxivləyin.',
-    question_in_use: 'Bu sual oyunlarda istifadə olunub, arxivləyin.',
+    delete_failed: 'Silinmə alınmadı. Yenidən cəhd edin.',
     last_admin: 'Sonuncu admini aşağı sala bilməzsiniz.',
     bad_role: 'Yanlış rol.',
     rows_required: 'İdxal üçün sətir yoxdur.',
@@ -214,18 +213,15 @@
     const short = r.body.length > 90 ? `${r.body.slice(0, 90)}…` : r.body;
     const warn = r.status === 'draft'
       ? 'Bu qaralama həmişəlik silinəcək.'
-      : 'Bu sual silinəcək. Əgər oyunlarda istifadə olunubsa, silinmir, arxivə göndərilir.';
+      : 'Bu sual həmişəlik silinəcək. Oyunçuların oyun tarixçəsində (arxivdə) istifadə olunubsa, oradan da çıxarılır. Xallar və reytinq dəyişmir, bu sualı oynayan aktiv oyunlar dayandırılır.';
     if (!window.confirm(`${warn}\n\n“${short}”\n\nDavam edək?`)) return;
     S.busy = true;
     try {
       const res = await rpc('remove_question', { p_id: r.id });
-      if (res === 'archived') toast('Sual oyunlarda istifadə olunub, ona görə silinmədi — arxivə göndərildi.', 5200);
-      else if (res === 'in_use') toast('Sual oyunlarda istifadə olunub və artıq arxivdədir, bazadan silinə bilməz.', 5200);
-      else {
-        toast('Silindi.');
-        if (r.media_path) sb.storage.from(BUCKET).remove([r.media_path]).catch(() => {});
-        if (S.list.rows.length === 1 && S.list.page > 0) S.list.page -= 1;
-      }
+      if (res !== 'deleted') throw new Error('delete_failed');
+      toast('Silindi.');
+      if (r.media_path) sb.storage.from(BUCKET).remove([r.media_path]).catch(() => {});
+      if (S.list.rows.length === 1 && S.list.page > 0) S.list.page -= 1;
     } catch (e) { toast(errText(e)); }
     S.busy = false;
     await loadList();
@@ -435,13 +431,12 @@
 
   async function deleteDraft() {
     const E = S.edit;
-    if (!window.confirm('Bu qaralama həmişəlik silinəcək. Davam edək?')) return;
+    if (!window.confirm('Bu sual həmişəlik silinəcək. Davam edək?')) return;
     try {
       const res = await rpc('remove_question', { p_id: E.id });
-      if (res === 'deleted') {
-        if (E.form.media_path) sb.storage.from(BUCKET).remove([E.form.media_path]).catch(() => {});
-        toast('Silindi.');
-      } else toast('Sual oyunlarda istifadə olunub, ona görə silinmədi — arxivə göndərildi.', 5200);
+      if (res !== 'deleted') throw new Error('delete_failed');
+      if (E.form.media_path) sb.storage.from(BUCKET).remove([E.form.media_path]).catch(() => {});
+      toast('Silindi.');
       go('list');
     } catch (e) { toast(errText(e)); }
   }
