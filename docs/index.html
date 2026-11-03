@@ -6,20 +6,8 @@
   <title>KALKHAN</title>
   <meta name="description" content="KALKHAN: Azərbaycan hüququ üzrə sual oyunu">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" id="tc" content="#F6F1E8">
-  <script>
-    /* Mövzu ilk çəkilişdən əvvəl tətbiq olunur (ağ/qara işıq çaxmasın) */
-    (function () {
-      try {
-        var t = localStorage.getItem('kalkhan.theme'), r = document.documentElement;
-        if (t === 'light' || t === 'dark') r.setAttribute('data-theme', t);
-        var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        document.getElementById('tc').setAttribute('content', dark ? '#0E0E0E' : '#F6F1E8');
-        var m = localStorage.getItem('kalkhan.motion');
-        if (m === 'reduce') r.classList.add('reduce-motion'); else if (m === 'full') r.classList.add('full-motion');
-      } catch (e) { /* məxfi rejim */ }
-    })();
-  </script>
+  <meta name="theme-color" content="#F6F1E8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0E0E0E" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="KALKHAN">
