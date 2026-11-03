@@ -1,6 +1,6 @@
 // Service worker: tətbiq qabığı oflayn açılır, yeniləmələr şəbəkədən gəlir.
 // Supabase sorğuları (başqa origin) heç vaxt keşlənmir.
-const VERSION = 'gfl-v1';
+const VERSION = 'gfl-v2';
 const SHELL = [
   './',
   './index.html',

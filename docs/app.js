@@ -309,7 +309,7 @@
       const st = await rpc('start_run', { p_mode: 'solo' });
       G = { runId: st.run_id, level: st.level, score: st.score, banked: 0, q: st.question, hidden: [],
         lifelines: st.lifelines_used || [], phase: 'asking', chosen: null, result: null, refs: {},
-        lastPct: null, lastSec: null };
+        lastPct: null, lastSec: null, mediaEl: null };
       sfx.tap();
       go('game');
       startTimer(TIME_LIMIT_MS - (st.elapsed_ms || 0));
@@ -386,6 +386,7 @@
       const st = await rpc('reveal_question', { p_run: G.runId });
       G.level = st.level;
       G.q = st.question;
+      G.mediaEl = null;
       G.hidden = [];
       G.chosen = null;
       G.result = null;
@@ -416,6 +417,14 @@
     if (!window.confirm('Oyundan çıxmaq istəyirsiniz? Bu oyunun irəliləyişi itəcək.')) return;
     G = null;
     go('home');
+  }
+
+  function mediaNode(m) {
+    if (!m) return null;
+    const url = `${cfg.SUPABASE_URL}/storage/v1/object/public/question-media/${m.path.split('/').map(encodeURIComponent).join('/')}`;
+    if (m.type === 'image') return h('img', { class: 'q-media', src: url, alt: m.alt || '', decoding: 'async' });
+    if (m.type === 'audio') return h('audio', { class: 'q-media', src: url, controls: true, preload: 'metadata', 'aria-label': m.alt || 'Səs' });
+    return h('video', { class: 'q-media', src: url, controls: true, playsinline: true, preload: 'metadata', 'aria-label': m.alt || 'Video' });
   }
 
   function seal(ok) {
@@ -489,7 +498,10 @@
       h('div', { class: 'ladder', role: 'img', 'aria-label': `12 pillədən ${g.level}-cisi` }, pips),
       h('div', { class: 'legend' }, h('span', {}, 'Təhlükəsiz: 4 və 8')),
       h('div', { class: 'timer' }, h('div', { class: 'timer-bar' }, fill), secs),
-      h('div', { class: 'card question' }, g.q.body),
+      h('div', { class: 'card question' },
+        // eyni media elementi yenidən çəkilişdə saxlanılır ki, səs/video çalarkən kəsilməsin
+        (g.mediaEl = g.mediaEl || mediaNode(g.q.media)),
+        h('div', {}, g.q.body)),
       answers,
       g.phase === 'feedback' ? feedback : lifeline,
     );
