@@ -9,8 +9,7 @@
   const BUCKET = 'question-media';
   const PAGE = 25;
   const TARGET_PER_LEVEL = 30;
-  const RANKS = ['Tələbə', 'Köməkçi', 'Stajyor', 'Hüquqşünas', 'Məsləhətçi', 'Vəkil',
-    'Prokuror', 'Hakim', 'Apellyasiya hakimi', 'Kassasiya hakimi', 'Konstitusiya hakimi', 'Ədalət zirvəsi'];
+  const levelLabel = (n) => (n === 1 ? '1 — ən asan' : n === 12 ? '12 — ən çətin' : String(n));
   const STATUS = { draft: 'Qaralama', in_review: 'Yoxlamada', published: 'Dərc olunub', archived: 'Arxiv' };
   const MEDIA_TYPES = {
     'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
@@ -22,7 +21,7 @@
   const ERR = {
     forbidden: 'Bu əməliyyata icazəniz yoxdur.',
     body_required: 'Sual mətni boş ola bilməz.',
-    bad_level: 'Pillə 1–12 arasında olmalıdır.',
+    bad_level: 'Çətinlik 1–12 arasında olmalıdır.',
     category_required: 'Kateqoriya seçin.',
     four_options_required: '4 variant lazımdır.',
     option_empty: 'Bütün variantları doldurun.',
@@ -66,10 +65,12 @@
     }
     return el;
   }
-  const LOGO = '<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="#0F5C5C"/>'
-    + '<rect x="9" y="29" width="8" height="10" rx="1.5" fill="#F6F1E7"/><rect x="20" y="22" width="8" height="17" rx="1.5" fill="#F6F1E7"/>'
-    + '<rect x="31" y="15" width="8" height="24" rx="1.5" fill="#F6F1E7"/><circle cx="35" cy="9" r="4" fill="#B8862B"/></svg>';
-  function logo() { const t = document.createElement('template'); t.innerHTML = LOGO; return t.content.firstChild; }
+  const brandMark = () => h('div', { class: 'brand' },
+    h('img', { class: 'emb', src: '../brand/emblem.png', alt: '' }),
+    h('img', { class: 'wm', src: '../brand/wordmark-dark.png', alt: 'KALKHAN' }),
+    h('span', { class: 'tag' }, 'Admin'));
+  const fullLogo = () => h('picture', {}, h('source', { srcset: '../brand/logo-full-dark.png', media: '(prefers-color-scheme: dark)' }),
+    h('img', { class: 'full', src: '../brand/logo-full.png', alt: 'KALKHAN' }));
 
   function toast(msg, ms = 3600) {
     $toast.textContent = msg;
@@ -113,7 +114,7 @@
         await start();
       },
     },
-    h('div', { class: 'brand' }, logo(), h('span', {}, 'Game for Lawyer · Admin')),
+    fullLogo(),
     h('div', { class: 'field' }, h('label', { for: 'u' }, 'İstifadəçi adı'), u),
     h('div', { class: 'field' }, h('label', { for: 'p' }, 'Parol'), p),
     err, btn);
@@ -121,7 +122,7 @@
 
   function viewNoAccess() {
     return h('div', { class: 'card login' },
-      h('div', { class: 'brand' }, logo(), h('span', {}, 'Game for Lawyer · Admin')),
+      fullLogo(),
       h('div', { class: 'notice' }, `"${S.me}" hesabının admin panelə icazəsi yoxdur. Admin sizə "editor" və ya "admin" rolu verməlidir, sonra yenidən daxil olun.`),
       h('button', { class: 'btn btn-ghost', type: 'button', onclick: logout }, 'Çıxış'));
   }
@@ -135,7 +136,7 @@
     return h('div', {},
       h('div', { class: 'header' },
         h('div', { class: 'header-in' },
-          h('div', { class: 'brand' }, logo(), h('span', {}, 'Admin panel')),
+          brandMark(),
           h('div', { class: 'who' }, h('span', {}, S.me), h('span', { class: 'badge b-role' }, S.role),
             h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: logout }, 'Çıxış'))),
         h('nav', { class: 'nav', 'aria-label': 'Bölmələr' }, items.map(([key, label]) => h('button', {
@@ -189,7 +190,7 @@
       h('div', { class: 'card row' },
         h('div', { class: 'field' }, h('label', {}, 'Status'), sel(L.status, [['', 'Hamısı'], ...Object.entries(STATUS)], (v) => { L.status = v; L.page = 0; loadList(); })),
         h('div', { class: 'field' }, h('label', {}, 'Kateqoriya'), sel(L.cat, [['', 'Hamısı'], ...S.cats.map((c) => [c.id, c.title_az])], (v) => { L.cat = v; L.page = 0; loadList(); })),
-        h('div', { class: 'field' }, h('label', {}, 'Pillə'), sel(L.level, [['', 'Hamısı'], ...RANKS.map((r, i) => [i + 1, `${i + 1} · ${r}`])], (v) => { L.level = v; L.page = 0; loadList(); })),
+        h('div', { class: 'field' }, h('label', {}, 'Çətinlik'), sel(L.level, [['', 'Hamısı'], ...Array.from({ length: 12 }, (_, i) => [i + 1, levelLabel(i + 1)])], (v) => { L.level = v; L.page = 0; loadList(); })),
         h('div', { class: 'field grow' }, h('label', {}, 'Axtarış'), h('input', {
           type: 'search', value: L.q, placeholder: 'Sual mətnində axtar…',
           oninput: (e) => { clearTimeout(timer); timer = setTimeout(() => { L.q = e.target.value; L.page = 0; loadList(); }, 300); },
@@ -239,7 +240,7 @@
     });
     L.tableBox.replaceChildren(
       h('table', {},
-        h('thead', {}, h('tr', {}, ['Pillə', 'Kateqoriya', 'Sual', 'Media', 'Status', 'İstinad', 'Cavab · düzgün', 'Yenilənib'].map((t) => h('th', {}, t)))),
+        h('thead', {}, h('tr', {}, ['Çətinlik', 'Kateqoriya', 'Sual', 'Media', 'Status', 'İstinad', 'Cavab · düzgün', 'Yenilənib'].map((t) => h('th', {}, t)))),
         h('tbody', {}, rows)),
       h('div', { class: 'row', style: 'margin-top:12px;justify-content:space-between;align-items:center' },
         h('span', { class: 'muted small' }, `${from}–${to} / ${L.total}`),
@@ -411,7 +412,7 @@
     const catSel = h('select', { id: 'cat', onchange: (e) => { f.category_id = Number(e.target.value); touch(); } },
       S.cats.filter((c) => c.is_active || c.id === f.category_id).map((c) => h('option', { value: c.id, selected: c.id === f.category_id }, c.title_az)));
     const lvlSel = h('select', { id: 'lvl', onchange: (e) => { f.level = Number(e.target.value); touch(); } },
-      RANKS.map((r, i) => h('option', { value: i + 1, selected: i + 1 === f.level }, `${i + 1} · ${r}`)));
+      Array.from({ length: 12 }, (_, i) => h('option', { value: i + 1, selected: i + 1 === f.level }, levelLabel(i + 1))));
 
     const opts = f.opts.map((t, i) => h('div', { class: 'opt' },
       h('input', { type: 'radio', name: 'correct', 'aria-label': `Variant ${'ABCD'[i]} düzgündür`, checked: f.correct === i, onchange: () => { f.correct = i; touch(); } }),
@@ -463,7 +464,7 @@
       h('div', { class: 'editor' },
         h('div', { class: 'stack' },
           h('div', { class: 'card stack' },
-            h('div', { class: 'grid2' }, h('div', { class: 'field' }, h('label', { for: 'cat' }, 'Kateqoriya'), catSel), h('div', { class: 'field' }, h('label', { for: 'lvl' }, 'Pillə (çətinlik)'), lvlSel)),
+            h('div', { class: 'grid2' }, h('div', { class: 'field' }, h('label', { for: 'cat' }, 'Kateqoriya'), catSel), h('div', { class: 'field' }, h('label', { for: 'lvl' }, 'Çətinlik'), lvlSel)),
             h('div', { class: 'field' }, h('label', { for: 'body' }, 'Sual mətni'),
               h('textarea', { id: 'body', rows: '4', maxlength: '1000', value: f.body, oninput: (e) => { f.body = e.target.value; touch(); } })),
             h('div', { class: 'field' }, h('label', {}, 'Variantlar (düzgünü işarələyin)'), h('div', { class: 'stack', style: 'gap:8px' }, opts)),
@@ -530,7 +531,7 @@
       resultBox.append(
         h('p', {}, `${I.fileName || 'Yapışdırılmış mətn'}: ${I.rows.length} sual oxundu. İlk 5 sətir:`),
         h('div', { class: 'scroll' }, h('table', {},
-          h('thead', {}, h('tr', {}, ['Kateqoriya', 'Pillə', 'Sual', 'Düzgün', 'İstinad'].map((t) => h('th', {}, t)))),
+          h('thead', {}, h('tr', {}, ['Kateqoriya', 'Çətinlik', 'Sual', 'Düzgün', 'İstinad'].map((t) => h('th', {}, t)))),
           h('tbody', {}, I.rows.slice(0, 5).map((r) => h('tr', {}, h('td', {}, r.category), h('td', {}, r.level), h('td', { class: 'q-body' }, r.body.slice(0, 120)), h('td', {}, r.correct), h('td', {}, r.legal_ref)))))),
         h('button', { class: 'btn btn-primary', type: 'button', disabled: S.busy, onclick: runImport }, S.busy ? 'İdxal olunur…' : `${I.rows.length} sualı qaralama kimi idxal et`));
     }
@@ -629,19 +630,19 @@
     const total = Object.values(grid).reduce((a, g) => a + g.published, 0);
     const rows = Object.entries(grid).map(([lvl, g]) => {
       const cls = g.published >= TARGET_PER_LEVEL ? 'ok' : g.published >= 10 ? 'mid' : 'low';
-      return h('tr', {}, h('td', {}, `${lvl} · ${RANKS[lvl - 1]}`), h('td', { class: `num ${cls}` }, String(g.published)),
+      return h('tr', {}, h('td', {}, `Çətinlik ${lvl}`), h('td', { class: `num ${cls}` }, String(g.published)),
         h('td', { class: 'num' }, String(g.in_review)), h('td', { class: 'num' }, String(g.draft)), h('td', { class: 'num' }, String(g.archived)));
     });
     const list = (title, arr) => h('div', { class: 'card scroll' }, h('h3', {}, title),
-      arr.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Pillə', 'Sual', 'Cavab', 'Düzgün'].map((t) => h('th', {}, t)))),
+      arr.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Çətinlik', 'Sual', 'Cavab', 'Düzgün'].map((t) => h('th', {}, t)))),
         h('tbody', {}, arr.map((r) => h('tr', { class: 'click', onclick: () => go('edit', r.question_id) }, h('td', {}, String(r.level)), h('td', { class: 'q-body' }, r.body.slice(0, 100)),
           h('td', {}, String(r.answered)), h('td', {}, `${Math.round(Number(r.correct_rate) * 100)}%`)))))
         : h('p', { class: 'muted small' }, 'Hələ kifayət qədər cavab yoxdur (hər sual üçün ən azı 5).'));
     return h('div', { class: 'stack' },
       h('h2', {}, 'Statistika'),
       h('div', { class: 'card scroll' },
-        h('p', {}, `Dərc olunmuş suallar: ${total}. Hədəf: hər pillədə ən azı ${TARGET_PER_LEVEL} (cəmi ${TARGET_PER_LEVEL * 12}).`),
-        h('table', { class: 'cov' }, h('thead', {}, h('tr', {}, h('th', {}, 'Pillə'), ['Dərc olunub', 'Yoxlamada', 'Qaralama', 'Arxiv'].map((t) => h('th', { class: 'num' }, t)))), h('tbody', {}, rows))),
+        h('p', {}, `Dərc olunmuş suallar: ${total}. Hədəf: hər çətinlik səviyyəsində ən azı ${TARGET_PER_LEVEL} (cəmi ${TARGET_PER_LEVEL * 12}).`),
+        h('table', { class: 'cov' }, h('thead', {}, h('tr', {}, h('th', {}, 'Çətinlik'), ['Dərc olunub', 'Yoxlamada', 'Qaralama', 'Arxiv'].map((t) => h('th', { class: 'num' }, t)))), h('tbody', {}, rows))),
       list('Ən çətin suallar (düzgün cavab faizi ən aşağı)', S.hardest),
       list('Ən asan suallar (düzgün cavab faizi ən yuxarı)', S.easiest));
   }

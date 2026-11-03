@@ -1,6 +1,6 @@
 // Service worker: tətbiq qabığı oflayn açılır, yeniləmələr şəbəkədən gəlir.
 // Supabase sorğuları (başqa origin) heç vaxt keşlənmir.
-const VERSION = 'gfl-v2';
+const VERSION = 'kalkhan-v3';
 const SHELL = [
   './',
   './index.html',
@@ -11,6 +11,19 @@ const SHELL = [
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './brand/emblem.png',
+  './brand/wordmark.png',
+  './brand/wordmark-dark.png',
+  './brand/logo-full.png',
+  './brand/logo-full-dark.png',
+  './fonts/barlow-latin-500-normal.woff2',
+  './fonts/barlow-latin-ext-500-normal.woff2',
+  './fonts/barlow-latin-700-normal.woff2',
+  './fonts/barlow-latin-ext-700-normal.woff2',
+  './fonts/barlow-condensed-latin-700-normal.woff2',
+  './fonts/barlow-condensed-latin-ext-700-normal.woff2',
+  './fonts/barlow-condensed-latin-800-normal.woff2',
+  './fonts/barlow-condensed-latin-ext-800-normal.woff2',
 ];
 
 self.addEventListener('install', (event) => {
