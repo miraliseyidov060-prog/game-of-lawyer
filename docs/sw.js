@@ -1,6 +1,6 @@
 // Service worker: tətbiq qabığı oflayn açılır, yeniləmələr şəbəkədən gəlir.
 // Supabase sorğuları (başqa origin) heç vaxt keşlənmir.
-const VERSION = 'kalkhan-v4';
+const VERSION = 'kalkhan-v5';
 const SHELL = [
   './',
   './index.html',
@@ -29,7 +29,10 @@ const SHELL = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(VERSION).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()),
+    // 'reload': brauzerin HTTP keşini keçir (GitHub Pages fayllara 10 dəqiqəlik keş qoyur)
+    caches.open(VERSION)
+      .then((cache) => Promise.all(SHELL.map((u) => fetch(u, { cache: 'reload' }).then((r) => (r.ok ? cache.put(u, r) : null)))))
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -46,8 +49,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
 
+  // 'no-cache': hər dəfə serverdən yoxlayır (dəyişməyibsə 304, yeni fayl dərhal görünür)
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-cache' })
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
