@@ -353,7 +353,7 @@
     const tab = (mode, text) => h('button', { class: 'tab', type: 'button', role: 'tab', 'aria-selected': S.authMode === mode ? 'true' : 'false', onclick: () => { S.authMode = mode; render(); } }, text);
 
     return h('div', { class: 'screen' },
-      h('div', { class: 'hero' }, fullLogo(), h('p', { class: 'muted' }, 'Hüquq biliyi sınağı. 12 sual, 30 saniyə, bir qalxan.')),
+      h('div', { class: 'hero' }, fullLogo()),
       h('div', { class: 'panel screen' },
         h('div', { class: 'tabs', role: 'tablist' }, tab('login', 'Daxil ol'), tab('signup', 'Qeydiyyat')),
         form));
