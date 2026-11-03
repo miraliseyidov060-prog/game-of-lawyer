@@ -53,8 +53,21 @@ cd docs && python3 -m http.server 8000   # http://localhost:8000
 
 - Layihə: `game-for-lawyer` (`gkfsppkpetziinyyxduj`), region `eu-central-1`
 - `docs/config.js` yalnız açıq (publishable) açarı saxlayır. `service_role` açarı repoya və söhbətə yazılmır.
-- Qeydiyyat: `signup` funksiyası `<ad>@players.gameforlawyer.app` hesabı yaradır (e-poçt təsdiqi yoxdur). Bu daxili ünvan köhnə hesabları pozmamaq üçün dəyişdirilməyib. Hələlik parol bərpası yoxdur.
+- Giriş: istifadəçi adı + parol (qeydiyyatda parol 2 dəfə yazılır) və ya Google. E-poçt təsdiqi və parol bərpası YOXDUR (e-poçt göndərmə xidməti qurulmayıb).
+  Qeydiyyat `signup` funksiyası ilə `<ad>@players.gameforlawyer.app` hesabı yaradır; Google ilə ilk girişdən sonra istifadəçi ad seçir.
+- Ayarlar: mövzu (sistem / işıqlı / gecə), səs, titrəyiş, animasiya, ad və parol dəyişmə, hesabı silmə.
+- Məşq rejimi: bir hüquq sahəsi üzrə 12 sual (sahədə ən azı 12 dərc olunmuş sual lazımdır), reytinqə, ən yaxşı xala və oyun sayına yazılmır.
 
-## Hələ yoxdur
+### "Google ilə davam et" düyməsini işə salmaq (bir dəfə)
 
-Apple/Google ilə giriş, parol bərpası, hesab silmə, onlayn duel, App Store/Google Play paketi, real suallar (hazırda `TEST sualı …`).
+Düymə Supabase-də Google provider açılan kimi özü görünür (kodda dəyişiklik lazım deyil).
+
+1. Google Cloud Console → APIs & Services → Credentials → Create credentials → OAuth client ID → **Web application**.
+   Authorized redirect URI: `https://gkfsppkpetziinyyxduj.supabase.co/auth/v1/callback`.
+   (OAuth consent screen: External, tətbiq adı KALKHAN, məxfilik siyasəti linki: `https://miraliseyidov060-prog.github.io/game-of-lawyer/privacy.html`.)
+2. Supabase → Authentication → Providers → Google: Enable, Client ID və Client Secret-i yapışdırın.
+3. Supabase → Authentication → URL Configuration: Site URL = `https://miraliseyidov060-prog.github.io/game-of-lawyer/`,
+   Redirect URLs-ə eyni ünvanı əlavə edin.
+
+Qeyd: iOS-da ana ekrana əlavə olunmuş tətbiqdə Google girişi bəzən Safari-yə qayıda bilər; brauzerdə problemsizdir.
+
