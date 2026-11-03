@@ -597,7 +597,7 @@
         btn.disabled = true;
         try {
           const { error } = await sb.auth.updateUser({ email: em }, { emailRedirectTo: REDIRECT });
-          if (error) throw new AppError(authCode(error));
+          if (error) { const c = authCode(error); throw new AppError(c === 'email_taken' ? 'email_exists' : c); }
           S.set.open = null; S.set.note = `Təsdiq linki göndərildi: ${em}. Linkə basandan sonra e-poçt hesabınıza bağlanacaq.`; render();
         } catch (e) { err.textContent = errMsg(e); btn.disabled = false; }
       } }, f.node, err, btn);

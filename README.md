@@ -53,8 +53,21 @@ cd docs && python3 -m http.server 8000   # http://localhost:8000
 
 - Layihə: `game-for-lawyer` (`gkfsppkpetziinyyxduj`), region `eu-central-1`
 - `docs/config.js` yalnız açıq (publishable) açarı saxlayır. `service_role` açarı repoya və söhbətə yazılmır.
-- Qeydiyyat: `signup` funksiyası `<ad>@players.gameforlawyer.app` hesabı yaradır (e-poçt təsdiqi yoxdur). Bu daxili ünvan köhnə hesabları pozmamaq üçün dəyişdirilməyib. Hələlik parol bərpası yoxdur.
+- Giriş: e-poçt + istifadəçi adı + parol (2 dəfə) və ya Google. Köhnə hesablar istifadəçi adı + parolla daxil olmağa davam edir.
+  Yeni hesab e-poçt təsdiqi tələb edir. Köhnə `signup` funksiyası (e-poçtsuz) yalnız köhnə hesablar üçün qalıb.
+- Ayarlar: mövzu (sistem / işıqlı / gecə), səs, titrəyiş, animasiya, ad/e-poçt/parol dəyişmə, hesabı silmə.
+- Məşq rejimi: bir hüquq sahəsi üzrə 12 sual, reytinqə, ən yaxşı xala və oyun sayına yazılmır (`start_practice`, `practice_category_id`).
 
-## Hələ yoxdur
+### Giriş sistemini işə salmaq (Supabase panelində, bir dəfə)
 
-Apple/Google ilə giriş, parol bərpası, hesab silmə, onlayn duel, App Store/Google Play paketi, real suallar (hazırda `TEST sualı …`).
+1. **SMTP** (Authentication → Emails → SMTP Settings): öz domeninizi Resend-də təsdiqləyin, sonra
+   host `smtp.resend.com`, port `465`, istifadəçi `resend`, parol = Resend API açarı, göndərən `noreply@<domen>`.
+   Domen təsdiqlənməyibsə Resend yalnız öz hesabınızın e-poçtuna göndərir. Supabase-in daxili serveri isə yalnız komanda üzvlərinə.
+2. **URL-lər** (Authentication → URL Configuration): Site URL və Redirect URLs-ə
+   `https://miraliseyidov060-prog.github.io/game-of-lawyer/` əlavə edin.
+3. **Confirm email** (Authentication → Providers → Email) açıq olsun. Köhnə (`@players.gameforlawyer.app`) hesablara e-poçt bağlamaq üçün
+   **Secure email change** söndürülməlidir (əks halda təsdiq köhnə saxta ünvana gedər).
+4. **Google** (Authentication → Providers → Google): Google Cloud Console-da OAuth Client ID (Web application) yaradın,
+   Authorized redirect URI = `https://gkfsppkpetziinyyxduj.supabase.co/auth/v1/callback`, Client ID və Secret-i Supabase-ə yapışdırın.
+   Provider açılan kimi tətbiqdə "Google ilə davam et" düyməsi avtomatik görünür.
+5. Bazada `supabase/migrations/005_practice_accounts.sql` tətbiq olunmalıdır (məşq rejimi, ad qaydaları, hesabı silmə).
