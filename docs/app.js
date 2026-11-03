@@ -176,7 +176,8 @@
       },
     }, icon(S.sound ? I.soundOn : I.soundOff));
   }
-  const topBar = (right) => h('header', { class: 'bar' }, h('div', { class: 'logo' }, wordmark()), right || null);
+  // Loqo bloku: nişan + KALKHAN sözü yanaşı, bir xətt üzərində
+  const topBar = (right) => h('header', { class: 'bar' }, h('div', { class: 'logo' }, h('img', { class: 'emb', src: 'brand/emblem.png', alt: '' }), wordmark()), right || null);
 
   /* ---------- Ekranlar ---------- */
   function viewBoot() {
@@ -238,7 +239,7 @@
     const rule = (n, title, text) => h('li', {}, h('span', { class: 'n' }, n), h('div', {}, h('b', {}, title), h('span', { class: 'muted' }, text)));
     return h('div', { class: 'screen' },
       topBar(soundButton()),
-      h('div', { class: 'me' }, h('img', { src: 'brand/emblem.png', alt: '' }), h('div', {}, h('p', { class: 'label' }, 'Salam'), h('h2', { class: 'disp' }, p.username))),
+      h('div', { class: 'hello' }, h('p', { class: 'label' }, 'Salam'), h('h2', { class: 'disp' }, p.username)),
       h('div', { class: 'tiles' },
         h('div', { class: 'tile black' }, h('span', { class: 'label' }, 'Ən yaxşı xal'), h('b', {}, fmt(p.best_score))),
         h('div', { class: 'tile orange' }, h('span', { class: 'label' }, 'Oyun sayı'), h('b', {}, fmt(p.games_played)))),

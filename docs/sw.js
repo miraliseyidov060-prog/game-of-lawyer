@@ -1,6 +1,6 @@
 // Service worker: tətbiq qabığı oflayn açılır, yeniləmələr şəbəkədən gəlir.
 // Supabase sorğuları (başqa origin) heç vaxt keşlənmir.
-const VERSION = 'kalkhan-v3';
+const VERSION = 'kalkhan-v3b';
 const SHELL = [
   './',
   './index.html',

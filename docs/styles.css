@@ -77,7 +77,9 @@ img { display: block; }
 
 /* Üst zolaq */
 .bar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+.bar .logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .bar .logo img { height: 22px; width: auto; }
+.bar .logo img.emb { height: 36px; }
 .icon-btn {
   width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
   background: var(--card); color: var(--ink); border: 2px solid var(--edge); border-radius: 6px; box-shadow: 3px 3px 0 var(--edge);
@@ -126,9 +128,8 @@ img { display: block; }
 .error { color: var(--bad); font-weight: 700; min-height: 22px; }
 
 /* Ana səhifə */
-.me { display: flex; align-items: center; gap: 16px; }
-.me img { width: 78px; height: auto; flex: none; }
-.me h2 { font-size: 44px; word-break: break-all; }
+.hello { display: flex; flex-direction: column; gap: 8px; padding: 6px 0 2px; min-width: 0; }
+.hello h2 { font-size: 46px; line-height: 1.04; overflow-wrap: anywhere; }
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .tile { border: 2px solid var(--edge); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 4px 4px 0 var(--edge); }
 .tile b { font: 800 46px/0.95 var(--disp); font-variant-numeric: tabular-nums; }
